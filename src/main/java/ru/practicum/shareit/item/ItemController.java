@@ -1,20 +1,14 @@
 package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
-/**
- * TODO Sprint add-controllers.
- */
 @RestController
 @RequestMapping("/items")
 @RequiredArgsConstructor
@@ -27,6 +21,7 @@ public class ItemController {
                           @RequestHeader(required = false, value = X_SHARER_USER_ID) Long userId) {
         return ItemMapper.toItemDto(itemService.create(ItemMapper.toItem(itemDto), userId));
     }
+
     @PatchMapping("/{itemId}")
     public ItemDto update(@RequestBody ItemDto itemDto,
                           @PathVariable Long itemId,
@@ -54,6 +49,7 @@ public class ItemController {
                 .collect(Collectors.toList());
 
     }
+
     @GetMapping("/search")
     public List<ItemDto> search(@RequestParam(required = false) String text,
                                 @RequestHeader(required = false, value = X_SHARER_USER_ID) Long userId) {

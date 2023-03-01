@@ -10,7 +10,7 @@ import java.util.Optional;
 public interface UserStorage {
     User create(User user) throws ValidationException;
 
-    User update(User user,Long userId);
+    User update(User user, Long userId);
 
     Optional<User> get(Long id);
 
@@ -18,5 +18,5 @@ public interface UserStorage {
 
     List<User> getAll();
 
-    boolean containsId (Long id);
+    boolean containsId(Long id);
 }

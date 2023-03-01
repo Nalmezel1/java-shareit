@@ -14,7 +14,7 @@ import java.util.List;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserService{
+public class UserServiceImpl implements UserService {
     private final UserStorage userStorage;
 
     @Override
@@ -29,12 +29,12 @@ public class UserServiceImpl implements UserService{
 
         User newUser = get(user.getId());
         if (user.getName() != null) newUser.setName(user.getName());
-        if (user.getEmail() != null){
-            if (getAll().stream().anyMatch(u -> u.getEmail().equals(user.getEmail()) && !u.getId().equals(user.getId())) )
+        if (user.getEmail() != null) {
+            if (getAll().stream().anyMatch(u -> u.getEmail().equals(user.getEmail()) && !u.getId().equals(user.getId())))
                 throw new EmailException("такой Email уже есть");
             newUser.setEmail(user.getEmail());
         }
-        return userStorage.update(newUser,newUser.getId());
+        return userStorage.update(newUser, newUser.getId());
     }
 
     @Override
@@ -57,7 +57,6 @@ public class UserServiceImpl implements UserService{
     public List<User> getAll() {
         return userStorage.getAll();
     }
-
 
     private void userMailValidate(User user) {
         if (user.getEmail() == null)
