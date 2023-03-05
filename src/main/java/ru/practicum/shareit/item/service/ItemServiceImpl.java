@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.repository.BookingRepository;
@@ -19,6 +20,8 @@ import ru.practicum.shareit.item.dto.ItemDtoWithBookingDate;
 import ru.practicum.shareit.item.dto.ItemMapper;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.repository.ItemRequestRepository;
+import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
@@ -45,12 +48,18 @@ public class ItemServiceImpl implements ItemService {
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
+    private final ItemRequestRepository itemRequestRepository;
 
     @Override
     @Transactional
     public ItemDto create(ItemDto itemDto, long idOwner) {
         User user = getUserOrThrow(idOwner);
-        Item item = ItemMapper.fromItemDto(itemDto);
+        Long requestId = itemDto.getRequestId();
+        ItemRequest itemRequest = null;
+        if (requestId != null) {
+            itemRequest = getItemRequestOrThrow(requestId);
+        }
+        Item item = ItemMapper.fromItemDto(itemDto, itemRequest);
         item.setOwner(user);
         return ItemMapper.toItemDto(itemRepository.save(item));
 
@@ -61,7 +70,7 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto update(long itemId, ItemDto itemDto, long idOwner) {
         Item item = getItemOrThrow(itemId);
         if (item.getOwner().getId() != idOwner) {
-            throw new WrongAccessException("error");
+            throw new WrongAccessException("To update, you need to be owner of the item");
         }
         ItemMapper.updateFromItemDto(itemDto, item);
         return ItemMapper.toItemDto(item);
@@ -74,7 +83,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDtoWithBookingDate> getByOwner(long idOwner) {
+    public List<ItemDtoWithBookingDate> getByOwner(long idOwner, Pageable pageable) {
         List<Item> items = itemRepository.findByOwnerId(idOwner, SORT_BY_ID_ASC);
         List<Comment> comments = commentRepository.findAllByItemIn(items);
         LocalDateTime now = now();
@@ -102,11 +111,8 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDto> search(String text) {
-        if (text.isBlank()) {
-            return List.of();
-        }
-        return itemRepository.search(text.toLowerCase()).stream().map(ItemMapper::toItemDto).collect(toList());
+    public List<ItemDto> search(String text, Pageable pageable) {
+        return itemRepository.search(text.toLowerCase(), pageable).stream().map(ItemMapper::toItemDto).collect(toList());
     }
 
     @Override
@@ -115,7 +121,7 @@ public class ItemServiceImpl implements ItemService {
         User user = getUserOrThrow(userId);
         Item item = getItemOrThrow(itemId);
         if (bookingRepository.findFirstByItemAndBookerAndEndBefore(item, user, now()).isEmpty()) {
-            throw new ValidationException("error access");
+            throw new ValidationException("wrong access");
         }
         Comment comment = CommentMapper.toComment(commentDto, user, item);
         commentRepository.save(comment);
@@ -123,11 +129,11 @@ public class ItemServiceImpl implements ItemService {
     }
 
     private Item getItemOrThrow(long id) {
-        return itemRepository.findById(id).orElseThrow(() -> new NotFoundException("error" + id));
+        return itemRepository.findById(id).orElseThrow(() -> new NotFoundException("item with id=" + id));
     }
 
     private User getUserOrThrow(long id) {
-        return userRepository.findById(id).orElseThrow(() -> new NotFoundException("error " + id));
+        return userRepository.findById(id).orElseThrow(() -> new NotFoundException("user with id = " + id));
     }
 
     private ItemDtoWithBookingDate addDateToItem(Item item, boolean isOwner) {
@@ -146,5 +152,9 @@ public class ItemServiceImpl implements ItemService {
         return ItemMapper.toItemDtoWithBookingDate(
                 item, last != null ? toBookingDtoShort(last) : null,
                 next != null ? toBookingDtoShort(next) : null, commentsDto);
+    }
+
+    private ItemRequest getItemRequestOrThrow(long id) {
+        return itemRequestRepository.findById(id).orElseThrow(() -> new NotFoundException("requestId = " + id));
     }
 }

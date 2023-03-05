@@ -6,6 +6,6 @@ import lombok.Value;
 @Value
 @Builder
 public class BookingDtoResponseShort {
-    Long id;
-    Long bookerId;
+    long id;
+    long bookerId;
 }

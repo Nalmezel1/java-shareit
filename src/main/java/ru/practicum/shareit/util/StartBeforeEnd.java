@@ -14,7 +14,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Documented
 @Constraint(validatedBy = BookingDateValidator.class)
 public @interface StartBeforeEnd {
-    String message() default "error";
+    String message() default "Start must be before end or not null";
 
     Class<?>[] groups() default {};
 

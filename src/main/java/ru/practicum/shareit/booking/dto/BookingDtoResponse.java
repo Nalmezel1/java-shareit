@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Builder
 public class BookingDtoResponse {
 
-    Long id;
+    long id;
     LocalDateTime start;
     LocalDateTime end;
     ItemDto item;
