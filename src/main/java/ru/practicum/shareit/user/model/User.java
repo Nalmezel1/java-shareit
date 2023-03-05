@@ -30,7 +30,7 @@ public class User {
     private Long id;
     @Column(name = "user_name")
     private String name;
-
+    @Column
     private String email;
 
     @Override
