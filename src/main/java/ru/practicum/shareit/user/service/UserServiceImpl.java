@@ -1,70 +1,60 @@
 package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.user.User;
-import ru.practicum.shareit.user.storage.UserStorage;
-import ru.practicum.shareit.exceptions.*;
+import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.user.repository.UserRepository;
+import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.dto.UserMapper;
+import ru.practicum.shareit.user.model.User;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static ru.practicum.shareit.user.dto.UserMapper.fromUserDto;
 
 @Service
-@Slf4j
-@Component
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
-    private final UserStorage userStorage;
+    private final UserRepository userRepository;
 
     @Override
-    public User create(User user) throws ValidationException {
-        if (getAll().stream().anyMatch(u -> u.getEmail().equals(user.getEmail())))
-            throw new EmailException("такой Email уже есть");
-        return userStorage.create(user);
+    @Transactional
+    public UserDto create(UserDto userDto) {
+        return UserMapper.toUserDto(userRepository.save(fromUserDto(userDto)));
     }
 
     @Override
-    public User update(User user) throws ValidationException {
+    @Transactional
+    public UserDto update(long id, UserDto userDto) {
+        User user = getUserOrThrow(id);
+        UserMapper.fromUserDtoToUpdate(userDto, user);
+        return UserMapper.toUserDto(user);
+    }
 
-        User newUser = get(user.getId());
-        if (user.getName() != null) newUser.setName(user.getName());
-        if (user.getEmail() != null) {
-            if (getAll().stream().anyMatch(u -> u.getEmail().equals(user.getEmail()) && !u.getId().equals(user.getId())))
-                throw new EmailException("такой Email уже есть");
-            newUser.setEmail(user.getEmail());
+    @Override
+    public List<UserDto> getAll() {
+        return userRepository.findAll().stream().map(UserMapper::toUserDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public UserDto get(long id) {
+        return UserMapper.toUserDto(getUserOrThrow(id));
+    }
+
+    @Override
+    @Transactional
+    public void delete(long id) {
+        try {
+            userRepository.deleteById(id);
+        } catch (EmptyResultDataAccessException | IllegalArgumentException exception) {
+            throw new NotFoundException("user with id=" + id);
         }
-        return userStorage.update(newUser, newUser.getId());
     }
 
-    @Override
-    public User get(Long id) throws ValidationException {
-        if (id == null) throw new ValidationException("пустой ID");
-        return userStorage.get(id).orElseThrow(() -> {
-            throw new NotFoundException("не тот id");
-        });
-    }
-
-    @Override
-    public void delete(Long id) throws ValidationException {
-        if (id == null) throw new ValidationException("пустой ID");
-        userStorage.delete(id).orElseThrow(() -> {
-            throw new NotFoundException("не тот id");
-        });
-    }
-
-    @Override
-    public List<User> getAll() {
-        return userStorage.getAll();
-    }
-
-    private void userMailValidate(User user) {
-        if (user.getEmail() == null)
-            throw new EmailException("Email пустой");
-        if (user.getEmail().isBlank() || !user.getEmail().contains("@"))
-            throw new EmailException("Email не корректный");
-        if (getAll().stream().anyMatch(u -> u.getEmail().equals(user.getEmail())))
-            throw new EmailException("такой Email уже есть");
-
+    private User getUserOrThrow(long id) {
+        return userRepository.findById(id).orElseThrow(() -> new NotFoundException("User with id = " + id));
     }
 }
