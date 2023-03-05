@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 
 @Value
 @Builder
-public class BookingDtoResponse{
+public class BookingDtoResponse {
 
     Long id;
     LocalDateTime start;

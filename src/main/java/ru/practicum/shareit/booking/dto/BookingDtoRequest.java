@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Value
 @Builder
 @StartBeforeEnd
-public class BookingDtoRequest{
+public class BookingDtoRequest {
 
     @FutureOrPresent
     LocalDateTime start;

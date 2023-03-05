@@ -1,6 +1,6 @@
 package ru.practicum.shareit.booking.model;
 
-public enum BookingState{
+public enum BookingState {
     ALL,
     CURRENT,
     PAST,

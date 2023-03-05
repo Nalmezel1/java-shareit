@@ -12,7 +12,7 @@ import static lombok.AccessLevel.PRIVATE;
 @NoArgsConstructor
 public class BookingMapper {
 
-    public static BookingDtoResponse toBookingDto(Booking booking){
+    public static BookingDtoResponse toBookingDto(Booking booking) {
         if (booking == null) {
             return null;
         }
@@ -26,7 +26,7 @@ public class BookingMapper {
                 .build();
     }
 
-    public static Booking toBooking(BookingDtoRequest bookingDtoRequest, User booker, Item item){
+    public static Booking toBooking(BookingDtoRequest bookingDtoRequest, User booker, Item item) {
         return Booking.builder()
                 .start(bookingDtoRequest.getStart())
                 .end(bookingDtoRequest.getEnd())

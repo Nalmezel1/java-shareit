@@ -30,7 +30,7 @@ public class BookingController {
     private final BookingService bookingService;
 
     @PostMapping
-    public BookingDtoResponse create(@RequestBody @Valid BookingDtoRequest bookingDtoRequest, @RequestHeader(X_SHARER_USER_ID) long bookerId){
+    public BookingDtoResponse create(@RequestBody @Valid BookingDtoRequest bookingDtoRequest, @RequestHeader(X_SHARER_USER_ID) long bookerId) {
         return bookingService.create(bookingDtoRequest, bookerId);
     }
 
@@ -47,7 +47,7 @@ public class BookingController {
     }
 
     @GetMapping()
-    public List<BookingDtoResponse> getAllByBooker(@RequestHeader(X_SHARER_USER_ID) long ownerId, @RequestParam(defaultValue = "ALL") BookingState state){
+    public List<BookingDtoResponse> getAllByBooker(@RequestHeader(X_SHARER_USER_ID) long ownerId, @RequestParam(defaultValue = "ALL") BookingState state) {
 
         return bookingService.getAllByBooker(ownerId, state);
     }

@@ -48,7 +48,7 @@ public class Booking {
     private BookingStatus status;
 
     @Override
-    public boolean equals(Object o){
+    public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         Booking booking = (Booking) o;
