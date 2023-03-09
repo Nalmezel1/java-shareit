@@ -28,26 +28,32 @@ public class UserController {
 
     @PostMapping()
     public UserDto create(@Validated(AdvancedConstraint.class) @RequestBody UserDto userDto) {
+        log.info("Creating user with email{}", userDto.getEmail());
         return userService.create(userDto);
     }
 
     @GetMapping
     public List<UserDto> getAll() {
+        log.info("Getting all Users");
         return userService.getAll();
     }
 
     @GetMapping("/{userId}")
     public UserDto get(@PathVariable("userId") long id) {
+        log.info("Getting user by id={}", id);
         return userService.get(id);
     }
 
     @PatchMapping("/{userId}")
-    public UserDto update(@PathVariable("userId") long id, @Validated(BasicConstraint.class) @RequestBody UserDto userDto) {
+    public UserDto update(@PathVariable("userId") long id,
+                          @Validated(BasicConstraint.class) @RequestBody UserDto userDto) {
+        log.info("Updating user id={}", id);
         return userService.update(id, userDto);
     }
 
     @DeleteMapping("/{userId}")
     public void delete(@PathVariable("userId") long id) {
+        log.info("Deleting user id={}", id);
         userService.delete(id);
     }
 }
